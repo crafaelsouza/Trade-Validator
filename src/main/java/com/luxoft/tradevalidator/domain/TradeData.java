@@ -9,7 +9,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.luxoft.tradevalidator.domain.enums.CurrencyPairType;
 import com.luxoft.tradevalidator.domain.enums.CurrencyType;
 import com.luxoft.tradevalidator.domain.enums.CustomerType;
 import com.luxoft.tradevalidator.domain.enums.DirectionType;
@@ -17,6 +16,7 @@ import com.luxoft.tradevalidator.domain.enums.LegalEntityType;
 import com.luxoft.tradevalidator.domain.enums.StrategyType;
 import com.luxoft.tradevalidator.domain.enums.TradeStyle;
 import com.luxoft.tradevalidator.domain.enums.TradeType;
+import com.luxoft.tradevalidator.util.annotations.EnumPairValidator;
 import com.luxoft.tradevalidator.util.annotations.NotNullIfAnotherFieldIsEqualsTo;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -47,8 +47,9 @@ public class TradeData {
 	@NotNull
 	private CustomerType customer;
 	
+	@EnumPairValidator(enumClazz=CurrencyType.class, sizeOfEachValue=3)
 	@NotNull
-	private CurrencyPairType ccyPair;
+	private String ccyPair;
 	
 	@NotNull
 	private TradeType type;

@@ -5,6 +5,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.luxoft.tradevalidator.domain.enums.ParameterKey;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,17 +15,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BankHoliday {
+public class ParameterConfig {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 	
-	private String currencyPair;
+	private ParameterKey key;
 	
-	private Integer day;
-	
-	private Integer month;
-	
-	private String description;
+	private String value;
 }

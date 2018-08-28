@@ -13,17 +13,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BankHoliday {
+public class CCPairExceptionSpotTrade {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 	
-	private String currencyPair;
+	private String ccyPair;
 	
-	private Integer day;
-	
-	private Integer month;
-	
-	private String description;
 }
