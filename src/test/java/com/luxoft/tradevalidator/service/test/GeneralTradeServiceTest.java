@@ -20,7 +20,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.luxoft.tradevalidator.domain.BankHoliday;
 import com.luxoft.tradevalidator.domain.TradeData;
-import com.luxoft.tradevalidator.domain.enums.CurrencyPairType;
 import com.luxoft.tradevalidator.domain.enums.CustomerType;
 import com.luxoft.tradevalidator.domain.enums.DirectionType;
 import com.luxoft.tradevalidator.domain.enums.LegalEntityType;
@@ -109,9 +108,9 @@ public abstract class GeneralTradeServiceTest {
 	@Test
 	public void testValidateValueDateFallingOnNonWorkingDay() throws TradeValidationException {
 		
-		BankHoliday bh1 = new BankHoliday(1, CurrencyPairType.EURUSD, 1, 1, "New Year's Day");
-		BankHoliday bh2 = new BankHoliday(2, CurrencyPairType.USDEUR, 1, 5, "Day OFF");
-		BankHoliday bh3 = new BankHoliday(2, CurrencyPairType.USDEUR, 2, 1, "Day OFF");
+		BankHoliday bh1 = new BankHoliday(1, "EURUSD", 1, 1, "New Year's Day");
+		BankHoliday bh2 = new BankHoliday(2, "USDEUR", 1, 5, "Day OFF");
+		BankHoliday bh3 = new BankHoliday(2, "USDEUR", 2, 1, "Day OFF");
 		
 		TradeData tradeData = createDefaultValidTradeData();
 		tradeData.setValueDate(LocalDate.of(2018, 1, 1));
@@ -135,7 +134,7 @@ public abstract class GeneralTradeServiceTest {
 	private TradeData createDefaultValidTradeData() {
 		TradeData tradeData = TradeData.builder()
 			.customer(CustomerType.PLUTO1)
-			.ccyPair(CurrencyPairType.EURUSD)
+			.ccyPair("EURUSD")
 			.style(TradeStyle.EUROPEAN)
 			.type(TradeType.SPOT)
 			.direction(DirectionType.BUY)

@@ -22,8 +22,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.luxoft.tradevalidator.domain.BankHoliday;
-import com.luxoft.tradevalidator.domain.CCPairExceptionSpotTrade;
 import com.luxoft.tradevalidator.domain.ParameterConfig;
 import com.luxoft.tradevalidator.domain.TradeData;
 import com.luxoft.tradevalidator.domain.enums.CustomerType;
@@ -40,10 +38,10 @@ import com.luxoft.tradevalidator.service.TradeService;
 import com.luxoft.tradevalidator.service.impl.TradeServiceImpl;
 import com.luxoft.tradevalidator.validator.SpotTradeValidator;
 import com.luxoft.tradevalidator.validator.TradeValidator;
-import com.luxoft.tradevalidator.validator.impl.ValueDateForSpotTransactionValidatorImpl;
+import com.luxoft.tradevalidator.validator.impl.ValueDateForForwardTransactionValidatorImpl;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SpotTradeServiceTest extends GeneralTradeServiceTest {
+public class ForwardTradeServiceTest extends GeneralTradeServiceTest {
 	
 
 	@Spy
@@ -77,99 +75,31 @@ public class SpotTradeServiceTest extends GeneralTradeServiceTest {
 		BDDMockito.given(parameterRepository.findByKey(ParameterKey.EXCEPTION_DAYS_AFTER_TRADE_DATE)).willReturn(param2);
 		
 		List<SpotTradeValidator> validators = new ArrayList<>();
-		validators.add(new ValueDateForSpotTransactionValidatorImpl(parameterRepository, ccPairExceptionRepository, bankHolidayRepository));
+		validators.add(new ValueDateForForwardTransactionValidatorImpl(parameterRepository, ccPairExceptionRepository, bankHolidayRepository));
 		BDDMockito.given(bankHolidayRepository.findByCurrencyPair(Mockito.any())).willReturn(Collections.emptyList());
-		specificValidators.put(TradeType.SPOT, validators);
+		specificValidators.put(TradeType.FORWARD, validators);
 	}
 	
 	@Test
-	public void testValidateValueDateOneDayBeforeTradeDate() throws TradeValidationException {
+	public void testValidateValueDateTwoDaysAfterTradeDate() throws TradeValidationException {
 		TradeData tradeData = createDefaultValidTradeData();
+		tradeData.setCcyPair("USDEUR");
+		tradeData.setTradeDate(LocalDate.of(2018, 8, 6));
 		tradeData.setValueDate(LocalDate.of(2018, 8, 8));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
+		
 		expectedException.expect(TradeValidationException.class);
-		expectedException.expectMessage(Matchers.containsString("'Value Date' must be 4 days after 'Trade Date'"));
+		expectedException.expectMessage(Matchers.containsString("'Value Date' must be at least 3 days after 'Trade Date'"));
 		
 		tradeService.validate(Arrays.asList(tradeData));
-	}
-	
-	@Test
-	public void testValidateValueDateTwoDaysBeforeTradeDateCurrencyDefault() throws TradeValidationException {
-		TradeData tradeData = createDefaultValidTradeData();
-		tradeData.setValueDate(LocalDate.of(2018, 8, 13));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
 		
-		tradeService.validate(Arrays.asList(tradeData));
 	}
-	
-	@Test
-	public void testValidateValueDateOneMonthAfterTradeDate() throws TradeValidationException {
-		TradeData tradeData = createDefaultValidTradeData();
-		tradeData.setValueDate(LocalDate.of(2018, 9, 12));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 10));
-		expectedException.expect(TradeValidationException.class);
-		expectedException.expectMessage(Matchers.containsString("'Value Date' must be 4 days after 'Trade Date'"));
 		
-		tradeService.validate(Arrays.asList(tradeData));
-	}
-	
 	@Test
-	public void testValidateValueDateOnHoliday() throws TradeValidationException {
-		TradeData tradeData = createDefaultValidTradeData();
-		tradeData.setValueDate(LocalDate.of(2018, 8, 13));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
-		tradeData.setCcyPair("EURUSD");
-		
-		BankHoliday b1 = new BankHoliday(1, "EURUSD", 13, 8, "Day Off");
-		BDDMockito.given(bankHolidayRepository.findByCurrencyPair("EURUSD")).willReturn(Arrays.asList(b1));
-		expectedException.expect(TradeValidationException.class);
-		expectedException.expectMessage(Matchers.containsString("'Value Date' must be 5 days after 'Trade Date'"));
-		
-		tradeService.validate(Arrays.asList(tradeData));
-	}
-	
-	
-	@Test
-	public void testValidateFallingAfterHolidays() throws TradeValidationException{
+	public void testValidateValueDateThreeDaysBeforeTradeDate() throws TradeValidationException {
 		TradeData tradeData = createDefaultValidTradeData();
 		tradeData.setCcyPair("USDEUR");
-		tradeData.setValueDate(LocalDate.of(2018, 8, 14));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
-		
-		List<BankHoliday> holidays = Arrays.asList(new BankHoliday(1, "USDEUR", 13, 8, "Day OFF"));
-		BDDMockito.given(bankHolidayRepository.findByCurrencyPair(Mockito.any())).willReturn(holidays );
-		
-		tradeService.validate(Arrays.asList(tradeData));
-		
-	}
-	
-	@Test
-	public void testValidateCurrencyPairInExceptionList() throws TradeValidationException{
-		TradeData tradeData = createDefaultValidTradeData();
-		tradeData.setCcyPair("USDEUR");
-		tradeData.setValueDate(LocalDate.of(2018, 8, 13));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
-		
-		BDDMockito.given(ccPairExceptionRepository.findAll()).willReturn(Arrays.asList(new CCPairExceptionSpotTrade(1, "USDEUR")));
-		
-		expectedException.expect(TradeValidationException.class);
-		expectedException.expectMessage(Matchers.containsString("'Value Date' must be 1 days after 'Trade Date'"));
-		
-		tradeService.validate(Arrays.asList(tradeData));
-	}
-	
-	@Test
-	public void testValidateFallingOnHolidays() throws TradeValidationException{
-		TradeData tradeData = createDefaultValidTradeData();
-		tradeData.setCcyPair("USDEUR");
-		tradeData.setValueDate(LocalDate.of(2018, 8, 13));
-		tradeData.setTradeDate(LocalDate.of(2018, 8, 9));
-		
-		List<BankHoliday> holidays = Arrays.asList(new BankHoliday(1, "USDEUR", 13, 8, "Day OFF"));
-		BDDMockito.given(bankHolidayRepository.findByCurrencyPair(Mockito.any())).willReturn(holidays );
-		
-		expectedException.expect(TradeValidationException.class);
-		expectedException.expectMessage(Matchers.containsString("'Value Date' must be 5 days after 'Trade Date'"));
+		tradeData.setTradeDate(LocalDate.of(2018, 8, 6));
+		tradeData.setValueDate(LocalDate.of(2018, 8, 9));
 		
 		tradeService.validate(Arrays.asList(tradeData));
 		
@@ -179,7 +109,7 @@ public class SpotTradeServiceTest extends GeneralTradeServiceTest {
 		TradeData tradeData = TradeData.builder()
 			.customer(CustomerType.PLUTO1)
 			.ccyPair("EURUSD")
-			.type(TradeType.SPOT)
+			.type(TradeType.FORWARD)
 			.style(TradeStyle.EUROPEAN)
 			.direction(DirectionType.BUY)
 			.valueDate(LocalDate.of(2018, 8, 10))

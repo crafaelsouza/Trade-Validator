@@ -15,7 +15,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.luxoft.tradevalidator.domain.BankHoliday;
 import com.luxoft.tradevalidator.domain.TradeData;
-import com.luxoft.tradevalidator.domain.enums.CurrencyPairType;
 import com.luxoft.tradevalidator.domain.enums.CurrencyType;
 import com.luxoft.tradevalidator.repository.BankHolidayRepository;
 import com.luxoft.tradevalidator.validator.impl.ValueDateFallingOnBankHolidayValidatorImpl;
@@ -38,8 +37,8 @@ public class ValueDateFallingOnBankHolidayValidatorTest {
 		tradeData.setPayCC(CurrencyType.USD);
 		tradeData.setValueDate(LocalDate.of(2018, 1, 2));
 		
-		BankHoliday bh1 = new BankHoliday(2, CurrencyPairType.USDEUR, 1, 5, "Day OFF");
-		BankHoliday bh2 = new BankHoliday(3, CurrencyPairType.USDEUR, 2, 1, "Day OFF");
+		BankHoliday bh1 = new BankHoliday(2, "USDEUR", 1, 5, "Day OFF");
+		BankHoliday bh2 = new BankHoliday(3, "USDEUR", 2, 1, "Day OFF");
 		
 		BDDMockito.given(bankHolidayRepository.findByCurrencyPair(tradeData.getCcyPair())).willReturn(Arrays.asList(bh1, bh2));
 		Optional<TradeErrorVO> error = validator.validate(tradeData);
@@ -50,11 +49,11 @@ public class ValueDateFallingOnBankHolidayValidatorTest {
 	@Test
 	public void testValidateValueDateWithoutFallingOnBankHoliday(){
 		TradeData tradeData = new TradeData();
-		tradeData.setCcyPair(CurrencyPairType.EURUSD);
+		tradeData.setCcyPair("EURUSD");
 		tradeData.setValueDate(LocalDate.of(2018, 1, 2));
 		
-		BankHoliday bh1 = new BankHoliday(1, CurrencyPairType.EURUSD, 1, 1, "New Year's Day");
-		BankHoliday bh2 = new BankHoliday(1, CurrencyPairType.EURUSD, 2, 5, "New Year's Day");
+		BankHoliday bh1 = new BankHoliday(1, "EURUSD", 1, 1, "New Year's Day");
+		BankHoliday bh2 = new BankHoliday(1, "EURUSD", 2, 5, "New Year's Day");
 		
 		BDDMockito.given(bankHolidayRepository.findByCurrencyPair(tradeData.getCcyPair())).willReturn(Arrays.asList(bh1, bh2));
 		Optional<TradeErrorVO> error = validator.validate(tradeData);

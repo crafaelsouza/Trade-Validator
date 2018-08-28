@@ -15,17 +15,20 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.luxoft.tradevalidator.domain.TradeData;
-import com.luxoft.tradevalidator.domain.enums.CurrencyPairType;
 import com.luxoft.tradevalidator.domain.enums.CustomerType;
 import com.luxoft.tradevalidator.domain.enums.DirectionType;
 import com.luxoft.tradevalidator.domain.enums.LegalEntityType;
 import com.luxoft.tradevalidator.domain.enums.TradeStyle;
 import com.luxoft.tradevalidator.domain.enums.TradeType;
 import com.luxoft.tradevalidator.exception.TradeValidationException;
+import com.luxoft.tradevalidator.repository.BankHolidayRepository;
+import com.luxoft.tradevalidator.repository.CCPairExceptionSpotTradeRepository;
+import com.luxoft.tradevalidator.repository.ParameterConfigRepository;
 import com.luxoft.tradevalidator.service.TradeService;
 import com.luxoft.tradevalidator.service.impl.TradeServiceImpl;
 import com.luxoft.tradevalidator.validator.OptionsTradeValidator;
@@ -43,6 +46,15 @@ public class OptionsTradeServiceTest extends GeneralTradeServiceTest {
 	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+	
+	@Mock
+	private ParameterConfigRepository parameterRepository;
+	
+	@Mock
+	private CCPairExceptionSpotTradeRepository ccPairExceptionRepository;
+	
+	@Mock
+	private BankHolidayRepository bankHolidayRepository;
 	
 	@Spy
 	@InjectMocks
@@ -126,7 +138,7 @@ public class OptionsTradeServiceTest extends GeneralTradeServiceTest {
 	private TradeData createDefaultValidTradeData() {
 		TradeData tradeData = TradeData.builder()
 			.customer(CustomerType.PLUTO1)
-			.ccyPair(CurrencyPairType.EURUSD)
+			.ccyPair("EURUSD")
 			.type(TradeType.OPTIONS)
 			.style(TradeStyle.EUROPEAN)
 			.direction(DirectionType.BUY)

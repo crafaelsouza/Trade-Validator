@@ -18,7 +18,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.luxoft.tradevalidator.controller.TradeController;
 import com.luxoft.tradevalidator.domain.TradeData;
-import com.luxoft.tradevalidator.domain.enums.CurrencyPairType;
 import com.luxoft.tradevalidator.domain.enums.CurrencyType;
 import com.luxoft.tradevalidator.domain.enums.CustomerType;
 import com.luxoft.tradevalidator.domain.enums.DirectionType;
@@ -78,6 +77,30 @@ public class TradeControllerTest extends AbstractControllerTest {
 	public void testSpotTradeDataWithTypeNull() throws Exception {
 		TradeData tradeData = createValidSpotOrForwardTradeData(TradeType.SPOT);
 		tradeData.setType(null);
+		
+		mockMvc.perform(post("/v1/validator")
+    			.contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(gson.toJson(new TradeDataRequestVO(Arrays.asList(tradeData))))
+        		)
+    			.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testSpotTradeDataWithNullCCYPair() throws Exception {
+		TradeData tradeData = createValidSpotOrForwardTradeData(TradeType.SPOT);
+		tradeData.setCcyPair(null);
+		
+		mockMvc.perform(post("/v1/validator")
+    			.contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(gson.toJson(new TradeDataRequestVO(Arrays.asList(tradeData))))
+        		)
+    			.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testSpotTradeDataWithInvalidCCYPair() throws Exception {
+		TradeData tradeData = createValidSpotOrForwardTradeData(TradeType.SPOT);
+		tradeData.setCcyPair("ABC");
 		
 		mockMvc.perform(post("/v1/validator")
     			.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -596,7 +619,7 @@ public class TradeControllerTest extends AbstractControllerTest {
 	private TradeData createValidSpotOrForwardTradeData(TradeType type) {
 		TradeData tradeData = TradeData.builder()
 			.customer(CustomerType.PLUTO1)
-			.ccyPair(CurrencyPairType.EURUSD)
+			.ccyPair("USDEUR")
 			.type(type)
 			.direction(DirectionType.BUY)
 			.tradeDate(LocalDate.of(2018, 8, 7))
